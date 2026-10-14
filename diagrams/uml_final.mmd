@@ -1,0 +1,41 @@
+classDiagram
+    class Task {
+        +str description
+        +time scheduled_time
+        +int duration_minutes
+        +str frequency
+        +str priority
+        +bool is_complete
+        +date due_date
+        +__post_init__() None
+        +mark_complete() None
+        +next_occurrence(completed_on: date) Task or None
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +List~Task~ tasks
+        +add_task(task: Task) None
+    }
+
+    class Owner {
+        +str name
+        +List~Pet~ pets
+        +add_pet(pet: Pet) None
+        +get_all_tasks() List~Task~
+    }
+
+    class Scheduler {
+        +sort_by_time(tasks: List~Task~) List~Task~
+        +filter_tasks(owner: Owner, pet_name: str, is_complete: bool) List~Task~
+        +complete_task(pet: Pet, task: Task, completed_on: date) Task or None
+        +detect_conflicts(owner: Owner) List~str~
+        +build_schedule(owner: Owner, available_minutes: int, schedule_date: date) List~Task~
+    }
+
+    Owner "1" *-- "0..*" Pet : has
+    Pet "1" *-- "0..*" Task : cares for
+    Scheduler ..> Owner : retrieves all tasks
+    Scheduler ..> Pet : completes task for
+    Scheduler ..> Task : sorts, filters, and schedules

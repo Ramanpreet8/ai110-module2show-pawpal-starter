@@ -42,29 +42,23 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
-## 🖥️ Sample Output
+## Features
 
-```
-Tasks sorted by time:
-07:30 - Breakfast
-07:30 - Medication
-16:00 - Playtime
-18:00 - Evening walk
+- Manage multiple pets and their care tasks from one owner profile.
+- Sort tasks by scheduled time and filter by pet and completion status.
+- Generate a daily schedule that prioritizes high-priority tasks, respects a
+  time budget, and excludes completed or future-due tasks.
+- Automatically create the next due instance of a daily or weekly task when it
+  is completed.
+- Warn about unfinished tasks that have the same due date and exact start time.
+- Keep the owner, pets, and tasks in Streamlit session state while using the app.
 
-Pending tasks for Mochi:
-18:00 - Evening walk
-07:30 - Breakfast
+## Architecture
 
-Conflict warnings:
-Warning: Conflict on 2026-10-13 at 07:30: Mochi: Breakfast, Luna: Medication
-
-Completed 'Breakfast'; next occurrence: 2026-10-14 at 07:30.
-
-Today's Schedule
-07:30 - Medication (Luna, cat; 5 min, high priority)
-16:00 - Playtime (Luna, cat; 20 min, low priority)
-18:00 - Evening walk (Mochi, dog; 30 min, medium priority)
-```
+The backend classes and scheduling algorithms live in
+[pawpal_system.py](./pawpal_system.py), the browser interface is in
+[app.py](./app.py), and the final Mermaid class diagram is
+[diagrams/uml_final.mmd](./diagrams/uml_final.mmd).
 
 ## 🧪 Testing PawPal+
 
@@ -91,8 +85,8 @@ tests/test_pawpal.py ............                                        [100%]
 
 **Confidence level:** 4/5 stars. All 12 automated tests pass across the core
 logic and listed edge cases. Conflict detection intentionally checks exact
-matching start times rather than overlapping task durations, and the Streamlit
-interface is not covered by this pytest suite.
+matching start times rather than overlapping task durations. The Streamlit
+workflow was smoke-tested separately; it is not covered by the pytest suite.
 
 ## 📐 Smarter Scheduling
 
@@ -106,14 +100,41 @@ interface is not covered by this pytest suite.
 
 Tasks have a due date (defaulting to today) as well as a time of day. Future-due tasks are left out of the current schedule until their due date.
 
-## 📸 Demo Walkthrough
+## Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+1. Start the browser app with `streamlit run app.py`, or run the terminal demo
+   with `python main.py`.
+2. In Streamlit, enter an owner name and add each pet with its name and species.
+3. Choose a pet, enter a care-task description, due date, scheduled time,
+   duration, frequency, and priority, then add the task.
+4. Use the pet and status filters to inspect tasks. The table is sorted by time.
+   Mark a pending task complete; daily and weekly tasks receive a new due
+   instance one or seven days later.
+5. Review exact-time conflict warnings and enter the available minutes before
+   generating today's schedule. The scheduler prioritizes tasks within that
+   budget and displays the selected plan in time order.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+The terminal demo exercises sorting, filtering, recurrence, conflict warnings,
+and schedule generation:
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+```text
+Tasks sorted by time:
+07:30 - Breakfast
+07:30 - Medication
+16:00 - Playtime
+18:00 - Evening walk
+
+Pending tasks for Mochi:
+18:00 - Evening walk
+07:30 - Breakfast
+
+Conflict warnings:
+Warning: Conflict on 2026-10-13 at 07:30: Mochi: Breakfast, Luna: Medication
+
+Completed 'Breakfast'; next occurrence: 2026-10-14 at 07:30.
+
+Today's Schedule
+07:30 - Medication (Luna, cat; 5 min, high priority)
+16:00 - Playtime (Luna, cat; 20 min, low priority)
+18:00 - Evening walk (Mochi, dog; 30 min, medium priority)
+```

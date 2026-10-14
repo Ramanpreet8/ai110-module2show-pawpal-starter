@@ -96,11 +96,16 @@ if all_tasks:
         }[selected_status],
     )
     st.caption(f"{len(filtered_tasks)} task(s) match these filters.")
-    filtered_task_ids = {id(task) for task in filtered_tasks}
+    sorted_filtered_tasks = scheduler.sort_by_time(filtered_tasks)
+    pet_by_task_id = {
+        id(task): pet
+        for pet in owner.pets
+        for task in pet.tasks
+    }
     st.dataframe(
         [
             {
-                "Pet": pet.name,
+                "Pet": pet_by_task_id[id(task)].name,
                 "Task": task.description,
                 "Due date": task.due_date.isoformat(),
                 "Time": task.scheduled_time.strftime("%H:%M"),
@@ -108,12 +113,10 @@ if all_tasks:
                 "Priority": task.priority,
                 "Complete": task.is_complete,
             }
-            for pet in owner.pets
-            for task in pet.tasks
-            if id(task) in filtered_task_ids
+            for task in sorted_filtered_tasks
         ],
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     pending_task_options = [
@@ -150,8 +153,11 @@ if all_tasks:
     else:
         st.info("All tasks are complete.")
 
-    for warning in scheduler.detect_conflicts(owner):
+    conflict_warnings = scheduler.detect_conflicts(owner)
+    for warning in conflict_warnings:
         st.warning(warning)
+    if not conflict_warnings:
+        st.success("No exact-time task conflicts detected.")
 
 st.divider()
 st.subheader("Today's schedule")
@@ -185,5 +191,5 @@ if st.session_state.schedule is not None:
                 for task in schedule
             ],
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
