@@ -44,14 +44,11 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
-
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule
+07:30 - Breakfast (Mochi, dog; 10 min, high priority)
+08:00 - Morning walk (Mochi, dog; 30 min, high priority)
+08:30 - Breakfast (Luna, cat; 10 min, medium priority)
 ```
 
 ## 🧪 Testing PawPal+
@@ -72,14 +69,13 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.build_schedule` | Considers high priority before medium and low; selected tasks are returned in scheduled-time order. |
+| Filtering | `Scheduler.build_schedule` | Excludes completed tasks and tasks that do not fit the remaining minute budget; continues checking later tasks that may fit. |
+| Multi-pet tasks | `Owner.get_all_tasks`, `Scheduler.build_schedule` | The scheduler obtains tasks through the owner's all-pets method. |
+| Conflict handling | — | Overlapping scheduled times are not currently resolved. |
+| Recurring tasks | `Task.frequency` | Frequency is stored but recurring instances are not generated. |
 
 ## 📸 Demo Walkthrough
 

@@ -4,18 +4,11 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design. 
-- What classes did you include, and what responsibilities did you assign to each?
-
-
-My three core user actions were: add a pet, schedule a task for a pet, and see today's schedule. I chose four classes. Task holds one activity (description, time, frequency, completion). Pet holds a pet's info and its list of tasks. Owner holds many pets and can return all tasks together through get_all_tasks(). Scheduler is the brain: it reads tasks through the Owner and sorts, filters, and checks them.
+My three core user actions were adding a pet, scheduling a task for a pet, and viewing today's schedule. I chose four classes: `Task` represents one care activity, including its description, scheduled time, duration, frequency, priority, and completion state. `Pet` stores a pet's basic information and its tasks. `Owner` stores the owner's pets and can gather their tasks with `get_all_tasks()`. `Scheduler` reads the owner's tasks and is responsible for sorting and filtering them into a daily plan based on the available time.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
-
-
+The design has not changed so far. I asked AI to review the Python skeleton against the UML. The `Owner` → `Pet` → `Task` relationships are represented by the owner's pet list and each pet's task list, and the scheduler depends on the owner rather than duplicating those collections. One detail to keep in mind during implementation is that `get_all_tasks()` returns a flat list; schedule output may need to preserve which pet each task belongs to. I left the skeleton unchanged because the existing relationships are sufficient for this draft, and adding another class or duplicating the pet reference in `Task` would add complexity before it is needed.
 
 ---
 
