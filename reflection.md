@@ -4,13 +4,18 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
+- Briefly describe your initial UML design. 
 - What classes did you include, and what responsibilities did you assign to each?
+
+
+My three core user actions were: add a pet, schedule a task for a pet, and see today's schedule. I chose four classes. Task holds one activity (description, time, frequency, completion). Pet holds a pet's info and its list of tasks. Owner holds many pets and can return all tasks together through get_all_tasks(). Scheduler is the brain: it reads tasks through the Owner and sorts, filters, and checks them.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+
 
 ---
 
