@@ -21,8 +21,7 @@ The design has not changed so far. I asked AI to review the Python skeleton agai
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+Conflict detection warns only when unfinished tasks share the same due date and exact start time; it does not detect tasks whose durations overlap. This keeps conflict checks lightweight and easy to explain, and the warning still catches the clearest scheduling collision. The tradeoff is that the owner may need to notice near-time overlaps manually.
 
 ---
 

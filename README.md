@@ -45,10 +45,25 @@ pip install -r requirements.txt
 ## 🖥️ Sample Output
 
 ```
+Tasks sorted by time:
+07:30 - Breakfast
+07:30 - Medication
+16:00 - Playtime
+18:00 - Evening walk
+
+Pending tasks for Mochi:
+18:00 - Evening walk
+07:30 - Breakfast
+
+Conflict warnings:
+Warning: Conflict on 2026-10-13 at 07:30: Mochi: Breakfast, Luna: Medication
+
+Completed 'Breakfast'; next occurrence: 2026-10-14 at 07:30.
+
 Today's Schedule
-07:30 - Breakfast (Mochi, dog; 10 min, high priority)
-08:00 - Morning walk (Mochi, dog; 30 min, high priority)
-08:30 - Breakfast (Luna, cat; 10 min, medium priority)
+07:30 - Medication (Luna, cat; 5 min, high priority)
+16:00 - Playtime (Luna, cat; 20 min, low priority)
+18:00 - Evening walk (Mochi, dog; 30 min, medium priority)
 ```
 
 ## 🧪 Testing PawPal+
@@ -71,11 +86,13 @@ Sample test output:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `Scheduler.build_schedule` | Considers high priority before medium and low; selected tasks are returned in scheduled-time order. |
-| Filtering | `Scheduler.build_schedule` | Excludes completed tasks and tasks that do not fit the remaining minute budget; continues checking later tasks that may fit. |
-| Multi-pet tasks | `Owner.get_all_tasks`, `Scheduler.build_schedule` | The scheduler obtains tasks through the owner's all-pets method. |
-| Conflict handling | — | Overlapping scheduled times are not currently resolved. |
-| Recurring tasks | `Task.frequency` | Frequency is stored but recurring instances are not generated. |
+| Sorting | `Scheduler.sort_by_time` | Returns a new task list ordered by scheduled time. `build_schedule` prioritizes high, then medium, then low priority within the time budget, and presents selected tasks by time. |
+| Filtering | `Scheduler.filter_tasks` | Filters all of an owner's tasks by pet name, completion status, or both. `build_schedule` also omits completed tasks and future-due tasks and skips tasks that do not fit the remaining minute budget. |
+| Conflict detection | `Scheduler.detect_conflicts` | Returns warning messages for unfinished tasks with the same due date and exact start time, including tasks belonging to different pets. Duration overlaps without identical start times are not detected. |
+| Recurring tasks | `Task.next_occurrence`, `Scheduler.complete_task` | Completing a daily or weekly task adds a fresh instance due one or seven days after completion. One-time tasks do not recur. |
+| Multi-pet tasks | `Owner.get_all_tasks`, `Scheduler.build_schedule` | Scheduling reads tasks through the owner's all-pets method. |
+
+Tasks have a due date (defaulting to today) as well as a time of day. Future-due tasks are left out of the current schedule until their due date.
 
 ## 📸 Demo Walkthrough
 

@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import date, time
 
 import streamlit as st
 
@@ -50,6 +50,7 @@ else:
         )
         task_description = st.text_input("Task description")
         scheduled_time = st.time_input("Scheduled time", value=time(8, 0))
+        due_date = st.date_input("Due date", value=date.today())
         duration_minutes = st.number_input(
             "Duration (minutes)", min_value=1, max_value=240, value=20
         )
@@ -67,6 +68,7 @@ else:
                 duration_minutes=int(duration_minutes),
                 frequency=frequency,
                 priority=priority,
+                due_date=due_date,
             )
             owner.pets[pet_index].add_task(task)
             st.session_state.schedule = None
@@ -74,19 +76,82 @@ else:
 
 all_tasks = owner.get_all_tasks()
 if all_tasks:
-    task_rows = [
-        {
-            "Pet": pet.name,
-            "Task": task.description,
-            "Time": task.scheduled_time.strftime("%H:%M"),
-            "Duration (min)": task.duration_minutes,
-            "Priority": task.priority,
-            "Complete": task.is_complete,
-        }
-        for pet in owner.pets
-        for task in pet.tasks
+    scheduler = Scheduler()
+    filter_col1, filter_col2 = st.columns(2)
+    with filter_col1:
+        selected_pet = st.selectbox(
+            "Filter by pet", ["All pets", *[pet.name for pet in owner.pets]]
+        )
+    with filter_col2:
+        selected_status = st.selectbox(
+            "Filter by status", ["All", "Pending", "Completed"]
+        )
+    filtered_tasks = scheduler.filter_tasks(
+        owner,
+        pet_name=None if selected_pet == "All pets" else selected_pet,
+        is_complete={
+            "All": None,
+            "Pending": False,
+            "Completed": True,
+        }[selected_status],
+    )
+    st.caption(f"{len(filtered_tasks)} task(s) match these filters.")
+    filtered_task_ids = {id(task) for task in filtered_tasks}
+    st.dataframe(
+        [
+            {
+                "Pet": pet.name,
+                "Task": task.description,
+                "Due date": task.due_date.isoformat(),
+                "Time": task.scheduled_time.strftime("%H:%M"),
+                "Duration (min)": task.duration_minutes,
+                "Priority": task.priority,
+                "Complete": task.is_complete,
+            }
+            for pet in owner.pets
+            for task in pet.tasks
+            if id(task) in filtered_task_ids
+        ],
+        hide_index=True,
+        use_container_width=True,
+    )
+
+    pending_task_options = [
+        (pet_index, task_index)
+        for pet_index, pet in enumerate(owner.pets)
+        for task_index, task in enumerate(pet.tasks)
+        if not task.is_complete
     ]
-    st.dataframe(task_rows, hide_index=True, use_container_width=True)
+    if pending_task_options:
+        with st.form("complete_task_form"):
+            selected_task = st.selectbox(
+                "Mark a task complete",
+                pending_task_options,
+                format_func=lambda selection: (
+                    f"{owner.pets[selection[0]].name}: "
+                    f"{owner.pets[selection[0]].tasks[selection[1]].description}"
+                ),
+            )
+            mark_complete = st.form_submit_button("Complete task")
+        if mark_complete:
+            selected_pet_obj = owner.pets[selected_task[0]]
+            selected_task_obj = selected_pet_obj.tasks[selected_task[1]]
+            next_task = scheduler.complete_task(
+                selected_pet_obj, selected_task_obj
+            )
+            st.session_state.schedule = None
+            if next_task is None:
+                st.success(f"Completed '{selected_task_obj.description}'.")
+            else:
+                st.success(
+                    f"Completed '{selected_task_obj.description}'. Next occurrence "
+                    f"is due {next_task.due_date:%Y-%m-%d}."
+                )
+    else:
+        st.info("All tasks are complete.")
+
+    for warning in scheduler.detect_conflicts(owner):
+        st.warning(warning)
 
 st.divider()
 st.subheader("Today's schedule")

@@ -5,8 +5,10 @@ classDiagram
         +int duration_minutes
         +str frequency
         +str priority
+        +date due_date
         +bool is_complete
         +mark_complete() None
+        +next_occurrence(completed_on: date) Task
     }
 
     class Pet {
@@ -24,6 +26,10 @@ classDiagram
     }
 
     class Scheduler {
+        +sort_by_time(tasks: List~Task~) List~Task~
+        +filter_tasks(owner: Owner, pet_name: str, is_complete: bool) List~Task~
+        +complete_task(pet: Pet, task: Task, completed_on: date) Task
+        +detect_conflicts(owner: Owner) List~str~
         +build_schedule(owner: Owner, available_minutes: int) List~Task~
     }
 
