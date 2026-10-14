@@ -129,3 +129,83 @@ def test_schedule_excludes_tasks_not_yet_due() -> None:
     )
 
     assert schedule == []
+
+
+def test_empty_owner_has_no_tasks_or_conflicts() -> None:
+    owner = Owner("Jordan")
+    scheduler = Scheduler()
+
+    assert owner.get_all_tasks() == []
+    assert scheduler.build_schedule(owner, available_minutes=60) == []
+    assert scheduler.detect_conflicts(owner) == []
+
+
+def test_schedule_prioritizes_tasks_and_respects_time_budget() -> None:
+    owner = Owner("Jordan")
+    pet = Pet("Mochi", "dog")
+    too_long_high = Task("Long walk", time(6, 0), 30, "once", "high")
+    high_priority = Task("Medication", time(10, 0), 10, "once", "high")
+    low_priority = Task("Breakfast", time(7, 0), 10, "once", "low")
+    pet.tasks.extend([too_long_high, high_priority, low_priority])
+    owner.add_pet(pet)
+
+    schedule = Scheduler().build_schedule(owner, available_minutes=20)
+
+    assert schedule == [low_priority, high_priority]
+    assert sum(task.duration_minutes for task in schedule) <= 20
+    assert too_long_high not in schedule
+
+
+def test_completing_one_time_task_does_not_create_another() -> None:
+    pet = Pet("Luna", "cat")
+    task = Task("Grooming", time(12, 0), 30, "once", "low")
+    pet.add_task(task)
+
+    next_task = Scheduler().complete_task(
+        pet, task, completed_on=date(2026, 10, 13)
+    )
+
+    assert task.is_complete is True
+    assert next_task is None
+    assert pet.tasks == [task]
+
+
+def test_conflict_detection_ignores_completed_tasks_and_different_dates() -> None:
+    owner = Owner("Jordan")
+    mochi = Pet("Mochi", "dog")
+    luna = Pet("Luna", "cat")
+    scheduled_time = time(8, 0)
+    mochi.add_task(
+        Task(
+            "Walk",
+            scheduled_time,
+            30,
+            "once",
+            "high",
+            is_complete=True,
+            due_date=date(2026, 10, 13),
+        )
+    )
+    luna.add_task(
+        Task(
+            "Medication",
+            scheduled_time,
+            5,
+            "once",
+            "high",
+            due_date=date(2026, 10, 13),
+        )
+    )
+    luna.add_task(
+        Task(
+            "Next-day medication",
+            scheduled_time,
+            5,
+            "once",
+            "high",
+            due_date=date(2026, 10, 14),
+        )
+    )
+    owner.pets.extend([mochi, luna])
+
+    assert Scheduler().detect_conflicts(owner) == []

@@ -69,18 +69,30 @@ Today's Schedule
 ## 🧪 Testing PawPal+
 
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests cover task completion and addition, chronological sorting, filtering by
+pet and completion status, daily and weekly recurrence, one-time tasks, exact-time
+conflict detection, empty owners, future-due tasks, and schedule time-budget and
+priority behavior.
 
 ```
-# Paste your pytest output here
+============================= test session starts ==============================
+platform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/ramanpreetsingh/ai110-module2show-pawpal-starter
+plugins: anyio-4.13.0
+collected 12 items
+
+tests/test_pawpal.py ............                                        [100%]
+
+============================== 12 passed in 0.03s ==============================
 ```
+
+**Confidence level:** 4/5 stars. All 12 automated tests pass across the core
+logic and listed edge cases. Conflict detection intentionally checks exact
+matching start times rather than overlapping task durations, and the Streamlit
+interface is not covered by this pytest suite.
 
 ## 📐 Smarter Scheduling
 
